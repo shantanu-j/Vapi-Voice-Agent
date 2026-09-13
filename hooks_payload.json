@@ -1,0 +1,52 @@
+{
+  "firstMessageInterruptionsEnabled": true,
+  "startSpeakingPlan": {
+    "waitSeconds": 2.0,
+    "smartEndpointingPlan": {
+      "provider": "vapi"
+    }
+  },
+  "stopSpeakingPlan": {
+    "numWords": 0,
+    "voiceSeconds": 0.1,
+    "backoffSeconds":  0.1
+  },
+  "hooks": [
+    {
+      "on": "customer.speech.timeout",
+      "options": {
+        "timeoutSeconds": 30,
+        "triggerMaxCount": 2,
+        "triggerResetMode": "onUserSpeech"
+      },
+      "do": [
+        {
+          "type": "say",
+          "prompt": "The caller has been silent for 15 seconds. Ignore any built-in idle message such as \"Are you still there?\" when deciding what to repeat. If the immediately preceding substantive message was the initial greeting and menu, repeat ONLY the menu options without the greeting or introduction. If the immediately preceding substantive message was a question, briefly repeat or rephrase ONLY that unanswered question. For example, if you asked for an email address, ask the caller to provide their email address again. Do not repeat the entire conversation. Keep the response short."
+        }
+      ],
+      "name": "idle_reask"
+    },
+    {
+      "on": "customer.speech.timeout",
+      "options": {
+        "timeoutSeconds": 60,
+        "triggerMaxCount": 1,
+        "triggerResetMode": "onUserSpeech"
+      },
+      "do": [
+        {
+          "type": "say",
+          "exact": "I haven't heard a response, so I'll end the call now. Feel free to call back anytime."
+        },
+        {
+          "type": "tool",
+          "tool": {
+            "type": "endCall"
+          }
+        }
+      ],
+      "name": "idle_end_call"
+    }
+  ]
+}
