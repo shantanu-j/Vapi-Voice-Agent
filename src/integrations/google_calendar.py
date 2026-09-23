@@ -3,16 +3,16 @@ import google.auth
 from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from settings import TARGET_SERVICE_ACCOUNT, DELEGATED_USER
+from config.settings import TARGET_SERVICE_ACCOUNT, DELEGATED_USER
+from src.core.logging import get_logger
 
-from logging_config import get_logger
 log = get_logger("statai.calendar")
+
 
 SCOPES = [
     "https://www.googleapis.com/auth/calendar",
     "https://www.googleapis.com/auth/calendar.events",
 ]
-
 
 def _get_calendar_service():
     base_credentials, _ = google.auth.default()
@@ -69,6 +69,9 @@ def create_meeting(
         ).execute()
 
         meet_link = event.get("hangoutLink")
+
+        log.info("Calendar event created | event_id=%s",event["id"],)
+
         return event["id"], meet_link
 
     except HttpError as e:
@@ -91,26 +94,34 @@ def cancel_meeting(event_id: str | None) -> None:
             eventId=event_id,
             sendUpdates="all",
         ).execute()
+
+        log.info("Calendar event canceled | event_id=%s",event_id,)
     except HttpError as e:
         log.warning("Could not cancel calendar event %s: %s", event_id, e)
     except Exception as e:
         log.warning("Unexpected error cancelling calendar event %s: %s", event_id, e)
 
-def update_meeting(
-    event_id: str | None,
-    start_time: dt.datetime,
-    timezone: str,
-    duration_minutes: int = 30,
-) -> bool:
+
+def update_meeting(event_id: str | None, start_time: dt.datetime, timezone: str, duration_minutes: int = 30,) -> bool:
     """
-    Patches the existing event's start/end time in place — same event ID, same
-    Meet link, same attendee. Returns True on success, False on failure.
+    Updates the start and end time of an existing event.
+    Keeps the same:
+    - Calendar event ID
+    - Google Meet link
+    - attendees
+    Returns:
+        True if successful, otherwise False.
     """
+
     if not event_id:
         return False
+
     try:
         service = _get_calendar_service()
-        end_time = start_time + dt.timedelta(minutes=duration_minutes)
+        end_time = start_time + dt.timedelta(
+            minutes=duration_minutes
+        )
+
 
         event_body = {
             "start": {"dateTime": start_time.isoformat(), "timeZone": timezone},
@@ -123,11 +134,18 @@ def update_meeting(
             body=event_body,
             sendUpdates="all",
         ).execute()
+
+        log.info(
+            "Calendar event rescheduled | event_id=%s",
+            event_id,
+        )
+
         return True
 
     except HttpError as e:
-        log.warning("Calendar API error during event reschedule: %s", e)
+        log.warning("Calendar API error during event reschedule: %s",e,)
         return False
+
     except Exception as e:
-        log.warning("Unexpected error during calendar event reschedule: %s", e)
+        log.warning("Unexpected error during calendar event reschedule: %s",e,)
         return False

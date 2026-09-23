@@ -15,15 +15,37 @@
 [![Vapi](https://img.shields.io/badge/Vapi-Voice%20AI-000000)](.)
 [![Status](https://img.shields.io/badge/status-production-brightgreen)](.)
 
+
 [**Statfinity**](https://statfinity.in/) | [**LinkedIn**](https://in.linkedin.com/company/statfinity)
+
+</div>
+
+Built by **Statfinity**. Meet **StellaAI** — a voice agent that doesn't just talk, it *acts*: checks real calendars, books real events, and keeps a fully auditable record of every call.
+
+---
+
+## 📸 StellaAI Preview
+
+StellaAI is configured on the **VapiAI platform** as the conversational voice interface for the appointment assistant.
+
+**AI Assistant**
+
+<div align="center">
+
+<img src="docs/vapi_assistant_overview.png" alt="StellaAI VapiAI Assistant" width="900">
+
+</div>
+
+**Tools**
+
+<div align="center">
+
+<img src="docs/vapi_assistant_configuration.png" alt="StellaAI VapiAI Configuration" width="900">
 
 </div>
 
 ---
 
-
-
-Built by **Statfinity**. Meet **StellaAI** — a voice agent that doesn't just talk, it *acts*: checks real calendars, books real events, and keeps a fully auditable record of every call.
 
 ## 📞 What StellaAI Does
 
@@ -37,6 +59,8 @@ Built by **Statfinity**. Meet **StellaAI** — a voice agent that doesn't just t
 | 💬 | **Logs feedback** — routed straight to the team |
 
 No simulated actions anywhere in this system. Every booking is a real Calendar event. Every record lives in BigQuery, queryable and auditable.
+
+---
 
 ## 🏗️ Architecture
 
@@ -70,49 +94,145 @@ FastAPI Backend — Google Cloud Run
          └── Appointment + complaint records
 ```
 
+---
+
 ## 🧩 Project Structure
 
 ```text
-stellaai/
-├── backend.py                            # FastAPI application and API endpoints
-├── bq_database.py                        # BigQuery queries and appointment persistence
-├── calendar_service.py                   # Google Calendar / Google Meet integration
-├── email_processor.py (Optional)         # Email normalization and verification workflow
-├── hooks_payload.json                    # Vapi assistant/webhook configuration payload
-├── logging_config.py                     # Application logging configuration
-├── mailbox_verifier.py (Optional)        # Mailbox verification integration
-├── settings.py                           # Environment-based configuration
-├── Dockerfile                            # Container image definition
-├── pyproject.toml                        # Python/UV project configuration
-├── requirements.txt                      # Runtime dependencies
-├── requirements_list.txt                 # Dependency reference/list
-├── uv.lock                               # Reproducible UV dependency lock
-├── README.md                             # Project documentation
-└── docs/
-    └── architecture-overview.png
+vapi_ai_voice_assistant/
+│
+├── config/
+│   ├── __init__.py
+│   └── settings.py
+│
+├── docs/
+│   ├── architecture_overview.png
+│   ├── logo.png
+│   ├── vapi_assistant_overview.png
+│   └── vapi_assistant_configuration.png
+│
+├── src/
+│   ├── api/
+│   │   ├── routes/
+│   │   │   ├── __init__.py
+│   │   │   ├── appointments.py
+│   │   │   ├── availability.py
+│   │   │   ├── complaints.py
+│   │   │   └── health.py
+│   │   ├── __init__.py
+│   │   └── dependencies.py
+│   │
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── exceptions.py
+│   │   └── logging.py
+│   │
+│   ├── integrations/
+│   │   ├── __init__.py
+│   │   ├── bigquery.py
+│   │   └── google_calendar.py
+│   │
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── appointment.py
+│   │   ├── availability.py
+│   │   └── complaint.py
+│   │
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── appointment_service.py
+│   │   ├── availability_service.py
+│   │   └── complaint_service.py
+│   │
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── datetime_utils.py
+│   │   └── timezone_utils.py
+│   │
+│   └── __init__.py
+│
+├── tests/
+│   ├── integration/
+│   │   ├── test_api.py
+│   │   ├── test_bigquery.py
+│   │   └── test_calendar.py
+│   │
+│   ├── unit/
+│   │   ├── test_appointment_service.py
+│   │   ├── test_availability_service.py
+│   │   └── test_timezone_utils.py
+│   │
+│   └── __init__.py
+│
+├── .dockerignore
+├── .gcloudignore
+├── hooks_payload.json
+├── Dockerfile
+├── LICENSE
+├── main.py
+├── pyproject.toml
+├── README.md
+├── requirements.txt
+├── test_main.py
+└── uv.lock
 ```
+
+---
 
 ## 📦 Core Modules
 
-**`backend.py`**  
-Exposes the FastAPI endpoints, validates Vapi webhook requests, orchestrates appointment operations, and connects the API layer to BigQuery and Google Calendar.
+### `src/api/`
 
-**`bq_database.py`**  
-Stores appointments and complaints, finds existing appointments, detects conflicts, and updates/cancels appointment records.
+Contains the FastAPI routes and request authentication.
 
-**`calendar_service.py`**  
-Creates, updates, and deletes Google Calendar events and creates Google Meet conference data.
+- Appointment endpoints
+- Availability endpoints
+- Complaint/feedback endpoint
+- Health endpoint
+- Vapi webhook authentication
 
-**`email_processor.py` / `mailbox_verifier.py` (Optional)**  
-Handle email normalization and mailbox verification.
+### `src/services/`
 
-**`settings.py`**  
-Loads deployment configuration from environment variables rather than hard-coding application settings.
+Contains the application's business logic.
 
-**`hooks_payload.json`**  
+- Appointment scheduling, cancellation, and rescheduling
+- Availability and free-slot calculation
+- Complaint/feedback handling
+
+### `src/integrations/`
+
+Handles external Google Cloud and Google Workspace integrations.
+
+- **BigQuery** — appointment and complaint persistence
+- **Google Calendar** — calendar events and Google Meet links
+
+### `src/models/`
+
+Contains Pydantic request and response models used by the API.
+
+### `src/utils/`
+
+Reusable date/time and timezone utilities.
+
+### `src/core/`
+
+Application-level exceptions and centralized logging configuration.
+
+### `config/`
+
+Contains environment-based application configuration and deployment settings.
+
+### `tests/`
+
+Contains unit and integration tests for the application and external integrations.
+
+### `hooks_payload.json`
+  
 Contains the payload used to configure/update the Vapi assistant integration.
 
+
 ---
+
 
 ## 🔧 VapiAI Tools
 
@@ -127,7 +247,9 @@ The current StellaAI assistant uses these Vapi tool actions:
 | `cancel_appointment` | Cancel one confirmed appointment |
 | `reschedule_appointment` | Move an existing appointment to a new time |
 | `note_complaint_request` | Record caller feedback/complaints |
-| `process_email` | Validate/process an email address when required | (Optional)
+
+
+---
 
 
 ## 🔄 Conversation & Tool Flows
@@ -166,13 +288,7 @@ Service Usage API
 
 Example:
 ```bash
-gcloud services enable \
-  run.googleapis.com \
-  cloudbuild.googleapis.com \
-  bigquery.googleapis.com \
-  calendar-json.googleapis.com \
-  iam.googleapis.com \
-  serviceusage.googleapis.com
+gcloud services enable   run.googleapis.com   cloudbuild.googleapis.com   bigquery.googleapis.com   calendar-json.googleapis.com   iam.googleapis.com   serviceusage.googleapis.com
 ```
 
 ---
@@ -263,7 +379,7 @@ uv venv
 Activate it on Windows:
 
 ```powershell
-.venv\Scripts\activate
+.venv\Scriptsctivate
 ```
 
 Activate it on macOS/Linux:
@@ -305,9 +421,21 @@ COMPLAINTS_TABLE_ID
 TARGET_SERVICE_ACCOUNT
 DELEGATED_USER
 VAPI_SERVER_SECRET=your-vapi-server-secret
-QUICKEMAILVERIFICATION_API_KEY (Optional)
 ```
 
+## 7. Vapi Assistant Configuration
+
+The `hooks_payload.json` file contains the Vapi assistant configuration and tool/webhook settings.
+After creating or updating the Vapi assistant, apply the configuration using the Vapi API:
+
+```bash
+curl.exe -X PATCH "https://api.vapi.ai/assistant/<ASSISTANT_ID>" `
+  -H "Authorization: Bearer <YOUR_VAPI_PROFILE_PRIVATE_KEY>" `
+  -H "Content-Type: application/json" `
+  -d "@hooks_payload.json"
+```
+
+---
 
 # 🚀 Deployment
 
@@ -316,7 +444,7 @@ QUICKEMAILVERIFICATION_API_KEY (Optional)
 Run the application locally using Uvicorn:
 
 ```bash
-uv run uvicorn backend:app --host 0.0.0.0 --port 8080
+uv run uvicorn main:app --host 0.0.0.0 --port 8080
 ```
 
 ### Google Cloud
@@ -324,15 +452,11 @@ uv run uvicorn backend:app --host 0.0.0.0 --port 8080
 Build the Docker image and deploy the application to Google Cloud Run:
 
 ```bash
-gcloud builds submit --tag gcr.io/<PROJECT_ID>/stataivoicev1-bot
+gcloud builds submit --tag gcr.io/<PROJECT_ID>/stellaai-bot
 
-gcloud run deploy stataivoicev1-bot \
-  --image gcr.io/<PROJECT_ID>/stataivoicev1-bot \
-  --platform managed \
-  --region us-central1
+gcloud run deploy stellaai-bot   --image gcr.io/<PROJECT_ID>/stellaai-bot   --platform managed   --region us-central1
 ```
 Configure the required environment variables and secrets in the Cloud Run service.
-
 
 ---
 
@@ -354,7 +478,6 @@ Configure the required environment variables and secrets in the Cloud Run servic
 | Meetings | Google Meet via Calendar API |
 | Authentication | Google service-account impersonation |
 | Workspace access | Domain-wide Delegation |
-| Email verification (Optional) | QuickEmailVerification |
 | Logging | Python logging configuration |
 
 ---

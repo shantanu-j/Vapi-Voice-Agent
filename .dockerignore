@@ -1,11 +1,53 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Git
 .git/
 .gitignore
-.env
+
+# Google Cloud
+.gcloudignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
 .venv/
 venv/
-.idea/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Local development
 .vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Tests
+tests/
+
+# Documentation
+docs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local temporary files
+*.tmp
+*.temp
