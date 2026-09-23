@@ -379,7 +379,7 @@ uv venv
 Activate it on Windows:
 
 ```powershell
-.venv\Scriptsctivate
+.venv\Scripts\activate
 ```
 
 Activate it on macOS/Linux:
